@@ -27,9 +27,12 @@ fn main() {
         None    => println!("Err")
     }
     println!("piece_length: {}", request.info.piece_length);
-    for piece in request.info.pieces.iter() {
-        println!("piece {} ", piece[0]);
-    }
+    //for piece in request.info.pieces.iter() {
+       // println!("piece {} ", piece[0]);
+    //}
+
+    println!("length: {}", request.info.length);
+    println!("name: {}", request.info.name);
 }
 
 fn get_raw_bencode(url: String) -> Torrent {
