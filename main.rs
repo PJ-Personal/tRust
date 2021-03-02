@@ -1,39 +1,56 @@
-extern crate rustc_serialize;
+use std::fs;
+use std::vec::Vec;
+use lava_torrent::torrent::v1::Torrent;
 
-use std::fs::File;
-use std::path::Path;
-use std::io::Read;
-//use bip_bencode::{BencodeRef, BRefAccess, BDecodeOpt};
+pub type Piece = Vec<u8>;
 
-
-#[derive(RustcEncodable, RustcDecodable, PartialEq)]
 struct BencodeInfo {
-    pieces: String,
-    piece_length: u64,
-    length: u64,
-    name: String,
+    pieces: Vec<Piece>,
+    piece_length: i64,
+    length: i64,
+    name: String
 }
 
-#[derive(RustcEncodable, RustcDecodable, PartialEq)]
 struct BencodeTorrent {
-    announce: String,
-    info: BencodeInfo,
-}
-
-fn read_file(file_name: String) -> std::io::Result<Vec<u8>> {
-    let mut file = File::open(file_name)?;
-
-    let mut data = Vec::new();
-    file.read_to_end(&mut data)?;
-
-    return Ok(data);
+    announce: Option<String>,
+    info: BencodeInfo
 }
 
 fn main() {
-    let path = String::from("/home/pj/documents/rust_torrent/Docs/ubuntu-20.04.2.0-desktop-amd64.iso.torrent");
+    let url: String = String::from("/home/pj/documents/rust_torrent/Docs/debian-10.3.0-amd64-netinst.iso.torrent");
 
-    match read_file(path) {
-        Ok(mut file) => println!("{}", String::from_utf8_lossy(&mut file)),
-        Err(e) => eprintln!("broke: {}", e),
+    let raw_bencode = get_raw_bencode(url);
+    let request = populate_request(raw_bencode);
+
+    match request.announce {
+        Some(x) => println!("announce: {}", x),
+        None    => println!("Err")
     }
+    println!("piece_length: {}", request.info.piece_length);
+    for piece in request.info.pieces.iter() {
+        println!("piece {} ", piece[0]);
+    }
+}
+
+fn get_raw_bencode(url: String) -> Torrent {
+    
+    let torrent = Torrent::read_from_file(url).unwrap();
+
+    return torrent;
+}
+
+fn populate_request(torrent: Torrent) -> BencodeTorrent {
+    let bencode_info = BencodeInfo {
+        pieces: torrent.pieces,
+        piece_length: torrent.piece_length,
+        length: torrent.length,
+        name: torrent.name
+    };
+
+    let bencode_torrent = BencodeTorrent {
+        announce: torrent.announce,
+        info: bencode_info
+    };
+
+    return bencode_torrent;
 }
