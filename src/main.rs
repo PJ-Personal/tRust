@@ -1,10 +1,10 @@
 mod bencode;
-mod contruct_url;
+mod construct_url;
 
 extern crate crypto;
 
 use bencode::{BencodeTorrent, get_bencode_from_file};
-use contruct_url::{get_url};
+use construct_url::{get_url};
 
 fn main() {
     let bencode_torrent: BencodeTorrent = get_bencode_from_file();
