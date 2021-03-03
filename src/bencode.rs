@@ -16,18 +16,12 @@ pub struct BencodeTorrent {
 }
 
 pub fn get_bencode_from_file() -> BencodeTorrent {
-    let url: String = String::from("/home/pj/documents/rust_torrent/Docs/debian-10.3.0-amd64-netinst.iso.torrent");
+    let url: String = String::from("/home/pj/documents/rust_torrent/Docs/ILSVRC2012_img_val.tar-5d6d0df7ed81efd49ca99ea4737e0ae5e3a5f2e5.torrent");
 
-    let raw_bencode = get_raw_bencode(url);
+    let raw_bencode = Torrent::read_from_file(url).unwrap();
     let request = populate_request(raw_bencode);
 
     return request;
-}
-
-fn get_raw_bencode(url: String) -> Torrent {
-    let torrent = Torrent::read_from_file(url).unwrap();
-
-    return torrent;
 }
 
 fn populate_request(torrent: Torrent) -> BencodeTorrent {

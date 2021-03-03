@@ -25,9 +25,7 @@ const PORT_CONSTANT: u16 = 6881;
 
 pub fn get_url(bencode_torrent: BencodeTorrent) -> String {
     let torrent_file: TorrentFile = bencode_torrent_to_torrent_file(bencode_torrent);
-
     let mut peer_ids = rand::thread_rng().gen::<[u8; 20]>();
-
     let track_url: String = build_tracker_url(&mut peer_ids, PORT_CONSTANT, torrent_file);
 
     return track_url;
