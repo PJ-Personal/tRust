@@ -1,12 +1,8 @@
-extern crate crypto;
-
 use crate::bencode;
 
 use bencode::{BencodeTorrent, Piece};
 
 use url::Url;
-use crypto::digest::Digest;
-use crypto::sha1::Sha1;
 use std::vec::Vec;
 use rand::Rng;
 use itertools::Itertools;
@@ -15,7 +11,7 @@ use itertools::Itertools;
 struct TorrentFile {
     announce: String,
     info_hash: String,
-    piece_hashes: Vec<Piece>,
+    piece_hashes: Vec<u8>,
     piece_length: i64,
     length: i64,
     name: String,
@@ -49,24 +45,21 @@ fn build_tracker_url(peer_ids: &mut [u8; 20], port: u16, torrent_file: TorrentFi
     return String::from(url.as_str());
 }
 
-fn generate_info_hash(pieces: Vec<Piece>) -> String {
-    let mut hasher = Sha1::new();
+fn generate_info_hash(pieces: &Piece) -> String {
     let mut vec: Vec<String> = Vec::new();
 
     for piece in pieces.iter() {
-        let piece_string = &*piece[0].to_string();
-        vec.push(String::from(piece_string));
+        let piece_to_hex = &piece;
+        vec.push(format!("{:X}", piece_to_hex));
     }
 
-    hasher.input_str(&vec.join(""));
-
-    return hasher.result_str();
+    return vec.join("%");
 }
 
 fn bencode_torrent_to_torrent_file(bencode: BencodeTorrent) -> TorrentFile {
     let torrent_file = TorrentFile {
-        announce: bencode.announce.unwrap(),
-        info_hash: generate_info_hash(bencode.info.pieces.clone()),
+        announce: bencode.announce,
+        info_hash: generate_info_hash(&bencode.info.pieces.clone()),
         piece_hashes: bencode.info.pieces,
         piece_length: bencode.info.piece_length,
         length: bencode.info.length,
